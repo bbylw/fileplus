@@ -512,7 +512,7 @@
           url: (() => {
             // 获取基础URL
             const baseUrl = location.origin + location.pathname.replace(/\/[^/]*$/, '/');
-            console.log('Generated base URL:', baseUrl); // 调试日志
+            console.log('Generated base URL:', baseUrl);
             return baseUrl;
           })()
         },
@@ -606,9 +606,11 @@
         if (window.fileList.length) {
           document.getElementById("file_list").innerHTML = tempList
             .map((item) => {
+              // 正确处理文件路径中的空格
+              const encodedPath = item.path.replace(/ /g, '%20');
               return `<li class="file ${item.ftype}">
-            <a target="_blank" href="${rootdm}${item.path}" onclick="getDir('${
-                item.type == "dir" ? item.path : ""
+            <a target="_blank" href="${rootdm}${encodedPath}" onclick="getDir('${
+                item.type == "dir" ? encodedPath : ""
               }', false, event)">${item.name}</a><span class='sha'>${
                 item.sha
               }</span><span class="size">${getUnit(item.size)}</span>
