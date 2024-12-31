@@ -507,7 +507,15 @@
         wrap.className = wrap.className ? "" : "w50";
       }
       let urls = [
-        { name: "本站", url: location.href },
+        { 
+          name: "本站", 
+          url: (() => {
+            // 获取基础URL
+            const baseUrl = location.origin + location.pathname.replace(/\/[^/]*$/, '/');
+            console.log('Generated base URL:', baseUrl); // 调试日志
+            return baseUrl;
+          })()
+        },
         { name: "gitmirror", url: `https://raw.gitmirror.com/${baseRepo}/master/` },
         { name: "jsdelivr", url: `https://gcore.jsdelivr.net/gh/${baseRepo}@master/` },
         { name: "jsdelivr1", url: `https://cdn.jsdelivr.net/gh/${baseRepo}/` },
@@ -517,6 +525,9 @@
         { name: "cf-ghproxy", url: `https://cf.ghproxy.cc/https://raw.githubusercontent.com/${baseRepo}/master/` },
         { name: "ghproxy.net", url: `https://ghproxy.net/https://raw.githubusercontent.com/${baseRepo}/master/` }
       ];
+
+      // 添加调试日志
+      console.log('All CDN URLs:', urls.map(u => ({name: u.name, url: u.url})));
 
       function initBtn() {
         let btnEl = document.getElementById("btn-wrap");
