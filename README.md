@@ -2,6 +2,8 @@
 
 一个基于 GitHub API 的简单文件管理系统，支持文件上传、下载、删除等基本操作。
 
+![](https://cdn.jsdelivr.net/gh/pusvsimg/img@main/Image/20241231125133097.png)
+
 > 本项目源自 [@dhjz/file](https://github.com/dhjz/file) 二次开发，感谢原作者的贡献。
 
 ## 主要特性
