@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>D-File</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/axios/1.1.3/axios.min.js"></script>
+    <script src="https://unpkg.com/js-base64"></script>
+    <link
+      rel="shortcut icon"
+      type="image/x-icon"
+      href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAMxJREFUOE+t06FuAkEQxvH/FxpegUoeovXUoOobJLapRDaw2T1b21qwoNGUB8BW45jwDmQJENIj3F2vd0wyZjL7m2QmK2qGar7nCLSGsadIF2hfgOLTvGZFQ47A/Xt0iFFG45jI5Kp+x9acfg71v4Dc4YKHTdDqDHSAQ2ZFzKkvLdH3LyDegGYqixcsvHkt0sDiXxcRz+Y1rw7AiwVN6wB9CxpXB8SreX1VByIDS/RRBxhaonACXGyzYwo8lrzEmgZP5rS+zWcqOTWzbQ96PEURUT++WAAAAABJRU5ErkJggg=="
+    />
+    <!-- <script src="https://cdn.bootcdn.net/ajax/libs/dayjs/1.11.7/dayjs.min.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/js-base64@3.7.5/base64.min.js"></script> -->
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html {
+        padding: 20px 0 10px;
+        background: #000;
+        color: #fff;
+      }
+      body {
+        font-size: 16px;
+        max-width: 80%;
+        margin: 0 auto;
+      }
+      h2 {
+        margin-bottom: 10px;
+      }
+      .back {
+        display: inline-block;
+        border: 1px solid #ff9000;
+        padding: 4px 12px;
+        font-size: 15px;
+        font-weight: normal;
+        cursor: pointer;
+        margin-left: 20px;
+        margin-top: 0;
+        background: #ff9000;
+        color: #000;
+        border-radius: 3px;
+        transition: all 0.2s;
+      }
+      .back:hover {
+        background: #000;
+        color: #ff9000;
+      }
+      input.back {
+        cursor: auto;
+        background: #1b1b1b;
+        border: 1px solid #333;
+        color: #fff;
+      }
+      .ftr {
+        float: right;
+      }
+      .file_list li {
+        line-height: 40px;
+        border-bottom: 1px solid #333;
+        display: flex;
+        align-items: center;
+        padding: 6px 0;
+      }
+      .w50 .file_list li {
+        float: left;
+        width: 31%;
+        margin-right: 2%;
+      }
+      .w50 .file_list li span.sha {
+        display: none;
+      }
+      .file_list li:before {
+        content: "其他";
+        background: #1b1b1b;
+        color: #fff;
+        min-width: 40px;
+        padding: 0 10px;
+        line-height: 26px;
+        height: 26px;
+        font-size: 13px;
+        margin-right: 8px;
+        text-align: center;
+        border-radius: 3px;
+      }
+      .file_list li.dir:before {
+        content: "文件夹";
+        background: #ff9000;
+        color: #000;
+      }
+      .file_list li.img:before {
+        content: "图片";
+        background: #ff9000;
+        color: #000;
+      }
+      .file_list li.video:before {
+        content: "视频";
+        background: #ff9000;
+        color: #000;
+      }
+      .file_list li.music:before {
+        content: "音频";
+        background: #ff9000;
+        color: #000;
+      }
+      .file_list li.code:before {
+        content: "代码";
+        background: #ff9000;
+        color: #000;
+      }
+      .file_list li.zip:before {
+        content: "压缩包";
+        background: #ff9000;
+        color: #000;
+      }
+      .file_list li.doc:before {
+        content: "Word";
+        background: #ff9000;
+        color: #000;
+      }
+      .file_list li.xls:before {
+        content: "Excel";
+        background: #ff9000;
+        color: #000;
+      }
+      .file_list li.ppt:before {
+        content: "PPT";
+        background: #ff9000;
+        color: #000;
+      }
+      .file_list li.pdf:before {
+        content: "PDF";
+        background: #ff9000;
+        color: #000;
+      }
+      .file_list li.txt:before {
+        content: "文本";
+        background: #ff9000;
+        color: #000;
+      }
+      .file_list li img {
+        margin-right: 6px;
+        display: inline-block;
+        vertical-align: middle;
+      }
+      .file_list li a {
+        color: #fff;
+        text-decoration: none;
+        flex: 1;
+        width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .file_list li.dir a {
+        text-decoration: underline;
+        color: #ff9000;
+        font-weight: bold;
+      }
+      .file_list li.dir .del {
+        visibility: hidden;
+        pointer-events: none;
+      }
+      .file_list li span {
+        color: #999;
+        font-size: 14px;
+      }
+      .file_list li span.sha {
+        min-width: 350px;
+        display: inline-block;
+      }
+      .file_list li span.size {
+        width: 80px;
+        display: inline-block;
+      }
+      .file_list li i {
+        border: 1px solid #ff9000;
+        padding: 4px 12px;
+        font-size: 14px;
+        font-style: normal;
+        cursor: pointer;
+        margin-left: 10px;
+        line-height: 20px;
+        background: #ff9000;
+        color: #000;
+        border-radius: 3px;
+        transition: all 0.2s;
+      }
+      .file_list li i:hover {
+        background: #000;
+        color: #ff9000;
+      }
+      .file-img {
+        width: 60px;
+        max-height: 60px;
+      }
+      li {
+        list-style-type: none;
+      }
+      @media screen and (max-width: 700px) {
+        body {
+          max-width: 95%;
+          padding: 0 10px;
+        }
+        .file_list li span {
+          display: none !important;
+        }
+        .back.ftr {
+          display: none;
+        }
+        input#search {
+          display: inline-block;
+          margin: 10px 0 0;
+          min-width: 200px;
+        }
+        button {
+          margin-top: 6px;
+        }
+        .file_list li {
+          width: 100% !important;
+          margin-right: 0 !important;
+          float: none !important;
+        }
+        h2 {
+          font-size: 16px;
+        }
+        .back {
+          padding: 2px 8px;
+          font-size: 13px;
+          margin-left: 10px;
+        }
+        #rootdm {
+          min-width: 200px;
+          width: 100%;
+          margin-bottom: 10px;
+        }
+        #btn-wrap {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 5px;
+          margin-top: 5px;
+        }
+        #btn-wrap button {
+          margin: 0;
+          font-size: 13px;
+          padding: 2px 8px;
+        }
+      }
+      input {
+        background: #1b1b1b;
+        outline: none;
+        line-height: 26px;
+        border: 1px solid #333;
+        padding: 0 10px;
+        display: inline-block;
+        min-width: 280px;
+        margin-top: 6px;
+        color: #fff;
+        border-radius: 3px;
+      }
+      button {
+        outline: none;
+        background: #1b1b1b;
+        border: 1px solid #333;
+        display: inline-block;
+        margin-left: 10px;
+        line-height: 18px;
+        padding: 4px 10px;
+        cursor: pointer;
+        color: #fff;
+        border-radius: 3px;
+        transition: all 0.2s;
+      }
+      button:hover {
+        border-color: #ff9000;
+      }
+      button span {
+        color: #ff9000;
+        display: block;
+      }
+      #file {
+        display: none;
+      }
+      h4 {
+        overflow: hidden;
+        margin-bottom: 20px;
+      }
+      h2 {
+        padding: 10px 0;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #333;
+        overflow: hidden;
+      }
+      .tip {
+        color: #999;
+        font-size: 12px;
+        margin-left: 20px;
+      }
+      i {
+        font-style: normal;
+      }
+      .hide {
+        display: none !important;
+      }
+      #loading {
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
+        left: 0;
+        top: 0;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ff9000;
+        z-index: 9;
+        font-size: 20px;
+      }
+      .drag-hint {
+        background: rgba(255, 144, 0, 0.1);
+        padding: 8px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+        border: 1px dashed #ff9000;
+        color: #ff9000;
+        text-align: center;
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0% { opacity: 0.6; }
+        50% { opacity: 1; }
+        100% { opacity: 0.6; }
+      }
+      #drop-zone {
+        transition: all 0.3s ease;
+        position: relative;
+      }
+      #drop-zone.dragover {
+        background: rgba(255, 144, 0, 0.1) !important;
+      }
+      #drop-zone.dragover:after {
+        content: '可以拖放多个文件到这里上传';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 24px;
+        color: #ff9000;
+        pointer-events: none;
+      }
+      .empty-folder-hint {
+        text-align: center;
+        padding: 40px 20px;
+        border: 2px dashed #ff9000;
+        border-radius: 8px;
+        margin: 20px 0;
+        background: rgba(255, 144, 0, 0.05);
+        transition: all 0.3s ease;
+      }
+      .empty-folder-hint:hover {
+        background: rgba(255, 144, 0, 0.1);
+      }
+      .empty-folder-hint i {
+        font-size: 40px;
+        color: #ff9000;
+        margin-bottom: 15px;
+        display: block;
+      }
+      @media screen and (max-width: 700px) {
+        #drop-zone.dragover:after {
+          font-size: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="drop-zone" style="min-height: calc(100vh - 200px); position: relative;" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+    <div class="drag-hint">
+      💡 支持拖拽上传：直接将文件拖放到页面任意位置即可上传
+    </div>
+    <p style="margin: 0">
+      版本号: 20250101-1
+      <span class="tip">测试延迟请在根目录上传<b>init.jpg</b>(50kb以内)</span>
+    </p>
+    <h4>
+      根域名: <input type="text" value="" id="rootdm" />
+      <div style="display: inline-block" id="btn-wrap"></div>
+    </h4>
+    <input type="file" id="file" class="filepond" name="filepond" />
+    <h2>
+      当前目录：<i id="repo"></i>
+      <span onclick="addDir()" class="back">新建目录</span>
+      <span onclick="document.getElementById('file').click()" class="back"
+        >上传文件</span
+      >
+      <span onclick="dirBack()" class="back">←返回</span>
+      <span onclick="refresh()" class="back ftr">刷新</span>
+      <span onclick="toggleWrap()" class="back ftr">分列</span>
+      <span onclick="updateToken()" class="back ftr">设置Token</span>
+      <span onclick="updateRepo()" class="back ftr">设置Repo</span>
+      <input
+        type="text"
+        class="back ftr"
+        id="search"
+        placeholder="关键词搜索, 回车确认"
+        onkeyup="search(event)"
+      />
+      <!-- <span onclick="history.go(-1)" class="back">返回</span> -->
+    </h2>
+    <div id="file_wrap">
+      <ul class="file_list" id="file_list">
+        加载中...
+      </ul>
+    </div>
+    <div id="loading" class="hide">处理中...</div>
+
+    <script>
+      window.baseRepo = localStorage.getItem("GIT_REPO") || "dhjz/file";
+      window.baseToken = localStorage.getItem("GIT_TOKEN") || "";
+      if (!baseToken) alert("请先设置仓库和token");
+
+      function toggleWrap() {
+        var wrap = document.getElementById("file_wrap");
+        wrap.className = wrap.className ? "" : "w50";
+      }
+      let urls = [
+        { name: "本站", url: location.href },
+        {
+          name: "gitmirror加速",
+          url: `https://raw.gitmirror.com/${baseRepo}/master/`,
+        },
+        {
+          name: "jsdelivr加速",
+          url: `https://gcore.jsdelivr.net/gh/${baseRepo}@master/`,
+        },
+        {
+          name: "jsdelivr1加速",
+          url: `https://cdn.jsdelivr.net/gh/${baseRepo}/`,
+        },
+      ];
+
+      function initBtn() {
+        let btnEl = document.getElementById("btn-wrap");
+        for (let j = 0; j < urls.length; j++) {
+          const temp = urls[j];
+          const btn = document.createElement("button");
+          btn.innerHTML = temp.name + `<span id="btn${j}"></span>`;
+          let ig = new Image();
+          ig.src = temp.url + "init.jpg?t=" + new Date().getTime();
+          let start = new Date().getTime();
+          ig.onload = function () {
+            document.getElementById(`btn${j}`).innerHTML =
+              new Date().getTime() - start + "ms";
+          };
+          ig.onerror = function () {
+            document.getElementById(`btn${j}`).innerHTML = "延迟过高";
+          };
+          btn.onclick = function () {
+            document.getElementById("rootdm").value = temp.url;
+            initFileList();
+          };
+          btnEl.append(btn);
+        }
+      }
+      initBtn();
+
+      window.request = axios.create({
+        baseURL: "https://api.github.com/",
+        timeout: 10000,
+        headers: {
+          Authorization: "Bearer " + baseToken,
+          Accept: "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+      });
+      request.interceptors.response.use(
+        function (response) {
+          console.log("请求成功", response);
+          hideLoading();
+          return response;
+        },
+        function (error) {
+          hideLoading();
+          return Promise.reject(error);
+        }
+      );
+
+      window.paths = [];
+      window.en = Base64.encode;
+      window.de = Base64.decode;
+
+      window.fileList = [];
+      function initFileList(searchVal) {
+        let rootdm = document.getElementById("rootdm").value || "";
+        let tempList = window.fileList;
+        if (searchVal && searchVal.trim()) {
+          tempList = window.fileList.filter((item) =>
+            item.name.includes(searchVal.trim())
+          );
+        }
+        if (window.fileList.length) {
+          document.getElementById("file_list").innerHTML = tempList
+            .map((item) => {
+              return `<li class="file ${item.ftype}">
+            <a target="_blank" href="${rootdm}${item.path}" onclick="getDir('${
+                item.type == "dir" ? item.path : ""
+              }', false, event)">${item.name}</a><span class='sha'>${
+                item.sha
+              }</span><span class="size">${getUnit(item.size)}</span>
+            <i onclick="delOne('${item.path}', '${
+                item.sha
+              }')" class="del">删除</i>
+          </li>`;
+            })
+            .join("");
+        } else {
+          document.getElementById("file_list").innerHTML = `
+            <div class="empty-folder-hint">
+              <i>📁</i>
+              <p>当前文件夹为空</p>
+              <p style="margin-top: 10px; font-size: 14px; color: #999;">
+                拖放文件到这里上传，或点击顶部的"上传文件"按钮
+              </p>
+            </div>
+          `;
+        }
+
+        document.getElementById("repo").innerHTML =
+          baseRepo + "/" + (paths.length ? paths[paths.length - 1] : "");
+      }
+
+      // 初始化根目录
+      if (baseToken) getDir("", true);
+
+      function getDir(path, isRoot, event, isBack) {
+        if (!path && !isRoot) return;
+        if (event) event.preventDefault();
+        showLoading();
+        getContent(path + "?t=" + new Date().getTime()).then((data) => {
+          console.log(data);
+          window.fileList = (data || [])
+            .filter((d) => d.name != "init.jpg")
+            .map((item) => {
+              item.ftype = getType(item.name);
+              if (item.type == "dir") item.ftype = "dir";
+              return item;
+            });
+          window.fileList.sort((a, b) => (a.type < b.type ? -1 : 1));
+          if (path && !isBack) paths.push(path);
+          initFileList();
+        });
+      }
+
+      function addDir() {
+        const val = prompt("请输入新建目录名称, 基于根目录, 不以/开头", "");
+        if (val) {
+          putDir(val);
+        }
+      }
+
+      function dirBack() {
+        if (!paths.length) return alert("已经是根目录了!");
+        paths.pop();
+        if (paths.length) {
+          getDir(paths[paths.length - 1], false, null, true);
+        } else {
+          getDir("", true, null, true);
+        }
+      }
+
+      function refresh() {
+        if (paths.length) {
+          getDir(paths[paths.length - 1], false, null, true);
+        } else {
+          getDir("", true, null, true);
+        }
+      }
+
+      function search(e) {
+        if (e.keyCode == 13) {
+          initFileList(document.getElementById("search").value);
+        }
+      }
+
+      function delOne(path, sha) {
+        if (path == "index.html") return alert("主页index.html不能被删除!");
+        if (window.confirm("是否确认删除改文件: " + path)) {
+          delFile(path, sha, true);
+        }
+      }
+
+      // putContent('ip.txt', base64Str)
+      document.getElementById("file").addEventListener("input", (e) => {
+        const file = e.target.files[0];
+        if (file)
+          putFile(
+            paths.length
+              ? paths[paths.length - 1] + "/" + file.name
+              : file.name,
+            file
+          );
+        document.getElementById("file").value = "";
+      });
+
+      function updateRepo() {
+        const val = prompt(
+          "请输入仓库 {owner}/{repo}",
+          localStorage.getItem("GIT_REPO") || "dhjz/file"
+        );
+        if (val) localStorage.setItem("GIT_REPO", val) || location.reload();
+      }
+
+      function updateToken() {
+        const val = prompt(
+          "请输入token",
+          localStorage.getItem("GIT_TOKEN") || ""
+        );
+        if (val) localStorage.setItem("GIT_TOKEN", val) || location.reload();
+      }
+
+      function getSha(path) {
+        return new Promise((reso, rej) => {
+          request
+            .get(`/repos/${baseRepo}/contents/${path}`)
+            .then((res) => reso(res.data.sha))
+            .catch(() => reso(null));
+        });
+      }
+
+      function getContent(path, isFull) {
+        if (isFull) return request.get(`/repos/${baseRepo}/contents/${path}`);
+
+        return new Promise((reso, rej) => {
+          request
+            .get(`/repos/${baseRepo}/contents/${path}`)
+            .then((res) => {
+              if (Array.isArray(res.data)) return reso(res.data);
+              reso(Base64.decode(res.data.content));
+            })
+            .catch(() => {
+              console.log("not exit file: " + path);
+              reso(null);
+            });
+        });
+      }
+
+      function putContent(path, content) {
+        const data = {
+          message: now() + " update " + path,
+          content: Base64.encode(content),
+        };
+
+        getSha(path).then((sha) => {
+          if (sha) data.sha = sha;
+          request.put(`/repos/${baseRepo}/contents/${path}`, data);
+        });
+      }
+
+      function putDir(path) {
+        const data = {
+          message: now() + " create dir " + path,
+          content: "",
+        };
+
+        getContent(path).then((res) => {
+          if (Array.isArray(res)) return alert("该目录已存在");
+          request
+            .put(
+              `/repos/${baseRepo}/contents/${path}${
+                path.endsWith("/") ? "" : "/"
+              }.init`,
+              data
+            )
+            .then(() => {
+              alert("新建目录成功: " + path);
+              refresh();
+            });
+        });
+      }
+
+      function delFile(path, sha, isTip) {
+        // getSha(path).then((sha) => {
+        // }).catch((e) => console.log('not exit file: ' + path))
+        request
+          .delete(`/repos/${baseRepo}/contents/${path}`, {
+            params: {
+              message: now() + " del " + path,
+              sha,
+            },
+          })
+          .then(() => {
+            if (isTip) alert("删除文件成功:" + path);
+            refresh();
+          });
+      }
+
+      // 添加文件上传队列管理
+      class UploadQueue {
+        constructor(concurrency = 3) {
+          this.queue = [];
+          this.running = 0;
+          this.concurrency = concurrency;
+          this.results = [];
+        }
+
+        add(file, targetPath) {
+          return new Promise((resolve, reject) => {
+            this.queue.push({
+              file,
+              targetPath,
+              resolve,
+              reject,
+              retries: 0
+            });
+            this.processNext();
+          });
+        }
+
+        async processNext() {
+          if (this.running >= this.concurrency || this.queue.length === 0) return;
+          
+          this.running++;
+          const task = this.queue.shift();
+          const { file, targetPath, resolve, reject, retries } = task;
+
+          try {
+            await this.uploadFile(file, targetPath, retries);
+            this.results.push({ success: true, file: file.name });
+            resolve();
+          } catch (error) {
+            console.error(`上传失败 (重试次数: ${retries}):`, error);
+            if (retries < 3) {
+              console.log(`重试上传: ${file.name}`);
+              this.queue.push({...task, retries: retries + 1});
+            } else {
+              this.results.push({ success: false, file: file.name, error });
+              reject(error);
+            }
+          } finally {
+            this.running--;
+            this.processNext();
+          }
+        }
+
+        async uploadFile(file, targetPath, retryCount) {
+          const sha = await getSha(targetPath);
+          if (sha && !window.confirm(`已存在该文件: ${targetPath}, 是否覆盖?`)) {
+            throw new Error('用户取消覆盖');
+          }
+
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsArrayBuffer(file);
+            
+            reader.onload = async () => {
+              try {
+                const arrayBuffer = reader.result;
+                const blob = new Blob([arrayBuffer], { type: file.type });
+                const content = await blob.arrayBuffer();
+                const data = {
+                  message: now() + " update " + targetPath,
+                  content: btoa(chunkChar(new Uint8Array(content))),
+                  sha,
+                };
+
+                await request.put(`/repos/${baseRepo}/contents/${targetPath}`, data, {
+                  headers: { "Content-Type": file.type }
+                });
+                resolve();
+              } catch (err) {
+                reject(err);
+              }
+            };
+            
+            reader.onerror = (err) => reject(err);
+          });
+        }
+
+        isComplete() {
+          return this.queue.length === 0 && this.running === 0;
+        }
+
+        getResults() {
+          return this.results;
+        }
+      }
+
+      function handleDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        document.getElementById('drop-zone').classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length === 0) return;
+
+        const uploadQueue = new UploadQueue(3); // 最多3个并发上传
+        showLoading(`准备上传 ${files.length} 个文件...`);
+        console.log('开始处理拖拽的文件:', files.length, '个文件');
+        
+        let processed = 0;
+        const totalFiles = files.length;
+        const promises = [];
+
+        Array.from(files).forEach((file, index) => {
+          const targetPath = paths.length
+            ? paths[paths.length - 1] + "/" + file.name
+            : file.name;
+          
+          promises.push(
+            uploadQueue.add(file, targetPath)
+              .then(() => {
+                processed++;
+                console.log(`文件 ${file.name} 上传成功，已处理 ${processed}/${totalFiles}`);
+                showLoading(`正在上传第 ${processed}/${totalFiles} 个文件...`);
+              })
+              .catch(err => {
+                console.error(`文件 ${file.name} 上传失败:`, err);
+              })
+          );
+        });
+
+        // 等待所有文件处理完成
+        Promise.allSettled(promises).then(() => {
+          const results = uploadQueue.getResults();
+          const successful = results.filter(r => r.success).length;
+          const failed = results.filter(r => !r.success).length;
+          
+          if (failed > 0) {
+            const failedFiles = results.filter(r => !r.success).map(r => r.file).join(', ');
+            alert(`上传完成。\n成功: ${successful} 个文件\n失败: ${failed} 个文件\n\n失败的文件: ${failedFiles}`);
+          } else {
+            alert(`所有文件上传成功！共 ${successful} 个文件。`);
+          }
+          
+          setTimeout(() => {
+            refresh();
+            hideLoading();
+          }, 1000);
+        });
+      }
+
+      function putFile(path, file) {
+        const uploadQueue = new UploadQueue(1);
+        showLoading(`正在上传: ${path}`);
+        
+        uploadQueue.add(file, path)
+          .then(() => {
+            alert("上传成功:" + path + ", 大小:" + getUnit(file.size));
+            refresh();
+          })
+          .catch(err => {
+            console.error("文件上传失败:", path, err);
+            alert("上传失败:" + path + ", 请重试");
+          })
+          .finally(() => {
+            hideLoading();
+          });
+      }
+
+      function chunkChar(arr) {
+        // content: btoa(String.fromCharCode(...new TextEncoder().encode(content))) 不太行
+        // String.fromCharCode()方法最多可以接受65535个参数
+        const chunkSize = 10000;
+        const chunks = [];
+        for (let i = 0; i < arr.length; i += chunkSize) {
+          chunks.push(arr.slice(i, i + chunkSize));
+        }
+        const strings = chunks.map((chunk) => String.fromCharCode(...chunk));
+        return strings.join("");
+      }
+
+      function now() {
+        return new Date(new Date().getTime() + 8 * 60 * 60 * 1000)
+          .toISOString()
+          .replace("T", " ")
+          .substring(0, 19);
+      }
+
+      function getType(val) {
+        if (/\.(jpg|jpeg|png|gif)$/i.test(val)) return "img";
+        if (/\.(mp4|avi|mov|wmv|flv)$/i.test(val)) return "video";
+        if (/\.(mp3|wav|wma|aac)$/i.test(val)) return "music";
+        if (/\.(doc|docx|odt)$/i.test(val)) return "doc";
+        if (/\.(xls|xlsx)$/i.test(val)) return "xls";
+        if (/\.(ppt|pptx)$/i.test(val)) return "ppt";
+        if (/\.(pdf)$/i.test(val)) return "pdf";
+        if (/\.(txt|ini|properties|yml|json|md)$/i.test(val)) return "txt";
+        if (/\.(java|html|htm|css|js|php|h|go|)$/i.test(val)) return "code";
+        if (/\.(zip|rar|7z|tar\.gz|tar\.bz2)$/i.test(val)) return "zip";
+        return "other";
+      }
+
+      function getUnit(bytes, decimals = 2) {
+        if (bytes === 0) return "0B";
+
+        const k = 1024;
+        const dm = decimals < 0 ? 0 : decimals;
+        const sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + "" + sizes[i];
+      }
+
+      function showLoading(val) {
+        document.getElementById("loading").innerHTML = val || "处理中...";
+        document.getElementById("loading").className = "";
+      }
+
+      function hideLoading() {
+        document.getElementById("loading").className = "hide";
+      }
+
+      // Add drag and drop handlers
+      function handleDragOver(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        document.getElementById('drop-zone').classList.add('dragover');
+      }
+
+      function handleDragLeave(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        document.getElementById('drop-zone').classList.remove('dragover');
+      }
+    </script>
+
+    <style>
+      .gg-folder {
+        transform: scale(var(--ggs, 1));
+      }
+      .gg-folder,
+      .gg-folder::after {
+        box-sizing: border-box;
+        position: relative;
+        display: block;
+        width: 22px;
+        height: 16px;
+        border: 2px solid;
+        border-radius: 3px;
+      }
+      .gg-folder::after {
+        content: "";
+        position: absolute;
+        width: 10px;
+        height: 4px;
+        border-bottom: 0;
+        border-top-left-radius: 2px;
+        border-top-right-radius: 4px;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        top: -5px;
+      }
+      .gg-file {
+        box-sizing: border-box;
+        position: relative;
+        display: block;
+        transform: scale(var(--ggs, 1));
+        width: 14px;
+        height: 16px;
+        border: 2px solid transparent;
+        border-right: 0;
+        border-top: 0;
+        box-shadow: 0 0 0 2px;
+        border-radius: 1px;
+        border-top-right-radius: 4px;
+        overflow: hidden;
+      }
+      .gg-file::after {
+        content: "";
+        display: block;
+        box-sizing: border-box;
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        border-left: 2px solid;
+        border-bottom: 2px solid;
+        right: -1px;
+        top: -1px;
+      }
+      .gg-image {
+        box-sizing: border-box;
+        position: relative;
+        display: block;
+        transform: scale(var(--ggs, 1));
+        width: 20px;
+        height: 16px;
+        overflow: hidden;
+        box-shadow: 0 0 0 2px;
+        border-radius: 2px;
+      }
+      .gg-image::after,
+      .gg-image::before {
+        content: "";
+        display: block;
+        box-sizing: border-box;
+        position: absolute;
+        border: 2px solid;
+      }
+      .gg-image::after {
+        transform: rotate(45deg);
+        border-radius: 3px;
+        width: 16px;
+        height: 16px;
+        top: 9px;
+        left: 6px;
+      }
+      .gg-image::before {
+        width: 6px;
+        height: 6px;
+        border-radius: 100%;
+        top: 2px;
+        left: 2px;
+      }
+      .gg-camera {
+        box-sizing: border-box;
+        position: relative;
+        display: block;
+        transform: scale(var(--ggs, 1));
+        border: 2px solid;
+        border-radius: 3px;
+        width: 18px;
+        height: 12px;
+        perspective: 24px;
+      }
+      .gg-camera::after,
+      .gg-camera::before {
+        content: "";
+        display: block;
+        box-sizing: border-box;
+        position: absolute;
+      }
+      .gg-camera::before {
+        border: 2px solid;
+        border-left-color: transparent;
+        transform: rotateY(-70deg);
+        width: 8px;
+        height: 8px;
+        right: -7px;
+        top: 0;
+      }
+      .gg-camera::after {
+        width: 10px;
+        height: 5px;
+        border-top: 2px solid;
+        border-right: 2px solid;
+        top: -5px;
+        right: 2px;
+        border-top-right-radius: 2px;
+      }
+      .gg-file.pdf:before {
+        content: "pdf";
+        font-size: 15px;
+        position: absolute;
+        bottom: -46%;
+        font-style: normal;
+        transform: scale(0.5) translateX(-54%);
+      }
+      .gg-file.doc:before {
+        content: "doc";
+        font-size: 15px;
+        position: absolute;
+        bottom: -46%;
+        font-style: normal;
+        transform: scale(0.5) translateX(-54%);
+      }
+    </style>
+  </body>
+</html>
